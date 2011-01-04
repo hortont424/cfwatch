@@ -56,25 +56,58 @@ def create_table_from_log(parsed_log):
     return table
 
 def populate_db_with_table(db, table):
-    print table
+    schema_fields = retrieve_schema(db, "logs")
 
-def create_cloudfront_db():
-    db = sqlite3.connect(':memory:')
+    cur = db.cursor()
 
-    db.execute("create table logs (scstatus text, scbytes text, csuriquery text, csmethod text, csreferer text, cshost text, csuristem text, time text, date text, cip text, xedgelocation text, csuseragent text)")
+    for row in table:
+        arg_accum = []
+
+        for key in schema_fields:
+            if not key in row:
+                arg_accum.append("-")
+            else:
+                arg_accum.append(row[key])
+
+        cur.execute("INSERT INTO logs VALUES ({0})".format(("?," * len(schema_fields))[:-1]), arg_accum)
+
+    db.commit()
+
+def create_cloudfront_log_db():
+    db = sqlite3.connect('cf.db')
+
+    if not retrieve_schema(db, "logs"):
+        db.execute("create table logs (scstatus text, scbytes text, csuriquery text, csmethod text, csreferer text, cshost text, csuristem text, time text, date text, cip text, xedgelocation text, csuseragent text)")
 
     return db
 
-def __main__():
-    cloudfront_db = create_cloudfront_db()
+def retrieve_schema(db, table_name):
+    cur = db.cursor()
+    cur.execute("SELECT sql FROM sqlite_master WHERE type='table' AND tbl_name=?", (table_name,))
+    rows = list(cur)
 
-    logs = get_logs_for_prefix("files.hortont.com-cloudfront")
+    if not rows:
+        return
+
+    schema_fields = [s.split()[0] for s in re.search(r"\((.*)\)", rows[0][0]).group(1).split(", ")]
+
+    return schema_fields
+
+def __main__():
+    cloudfront_db = create_cloudfront_log_db()
+
+    logs = list(get_logs_for_prefix("files.hortont.com-cloudfront"))
     table = []
 
-    for parsed_log in [parse_w3c_log(log) for key, log in logs]:
+    for key, parsed_log in [(key, parse_w3c_log(log)) for key, log in logs]:
+        print "Importing", key.key
         table.extend(create_table_from_log(parsed_log))
 
     populate_db_with_table(cloudfront_db, table)
+
+    for key, log in logs:
+        print "Deleting", key.key
+        key.delete()
 
 if __name__ == "__main__":
     __main__()
