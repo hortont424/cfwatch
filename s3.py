@@ -93,10 +93,8 @@ def retrieve_schema(db, table_name):
 
     return schema_fields
 
-def __main__():
-    cloudfront_db = create_cloudfront_log_db()
-
-    logs = list(get_logs_for_prefix("files.hortont.com-cloudfront"))
+def import_cloudfront_logs(cloudfront_db, prefix):
+    logs = list(get_logs_for_prefix(prefix))
     table = []
 
     for key, parsed_log in [(key, parse_w3c_log(log)) for key, log in logs]:
@@ -108,6 +106,12 @@ def __main__():
     for key, log in logs:
         print "Deleting", key.key
         key.delete()
+
+def __main__():
+    cloudfront_db = create_cloudfront_log_db()
+
+    for prefix in CF_PREFIXES:
+        import_cloudfront_logs(cloudfront_db, prefix)
 
 if __name__ == "__main__":
     __main__()
