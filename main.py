@@ -46,12 +46,16 @@ def mapreduce_rows(db, stats):
 
     for (stat, (map, reduce, display)) in stats_funcs.items():
         results[stat] = reduce(map_results[stat])
-        print display(results[stat])
+        yield display(results[stat])
 
 def __main__():
     cloudfront_db = open_cloudfront_log_db()
 
-    mapreduce_rows(cloudfront_db, STATS)
+    output = list(mapreduce_rows(cloudfront_db, STATS))
+
+    print "<pre>"
+    print "\n\n".join(output)
+    print "</pre>"
 
 if __name__ == "__main__":
     __main__()

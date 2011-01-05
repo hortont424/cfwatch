@@ -23,6 +23,7 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from datetime import date
 from collections import defaultdict
 from operator import itemgetter
 from heapq import nlargest
@@ -47,6 +48,22 @@ def total_bytes():
     return (map, reduce, display)
 
 @statistic
+def daily_bytes():
+    def map(row):
+        if row[8] == date.today().strftime("%Y-%m-%d"):
+            return int(row[1])
+        else:
+            return 0
+
+    def reduce(results):
+        return sum(results)
+
+    def display(result):
+        return "Transfer Today: {0}".format(format_size(result))
+
+    return (map, reduce, display)
+
+@statistic
 def top_files_requests():
     def map(row):
         return row[6]
@@ -60,7 +77,7 @@ def top_files_requests():
         return cnt
 
     def display(result):
-        largest_items = nlargest(20, result.iteritems(), itemgetter(1))
+        largest_items = nlargest(15, result.iteritems(), itemgetter(1))
         return ("Most Requested Files ({0}):\n   ".format(len(result)) +
                 "\n   ".join(["{0} - {1}".format(name, num) for name, num in largest_items]))
 
@@ -80,7 +97,7 @@ def top_files_transfer():
         return cnt
 
     def display(result):
-        largest_items = nlargest(20, result.iteritems(), itemgetter(1))
+        largest_items = nlargest(15, result.iteritems(), itemgetter(1))
         return ("Most Transferred Files ({0}):\n   ".format(len(result)) +
                 "\n   ".join(["{0} - {1}".format(name, format_size(num)) for name, num in largest_items]))
 
@@ -100,7 +117,7 @@ def transfer_per_bucket():
         return cnt
 
     def display(result):
-        largest_items = nlargest(20, result.iteritems(), itemgetter(1))
+        largest_items = nlargest(15, result.iteritems(), itemgetter(1))
         return ("Transfer Per Bucket ({0}):\n   ".format(len(result)) +
                 "\n   ".join(["{0} - {1}".format(name, format_size(num)) for name, num in largest_items]))
 
