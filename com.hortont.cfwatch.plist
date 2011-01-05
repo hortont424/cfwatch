@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>KeepAlive</key>
+<false/>
+<key>Label</key>
+<string>com.hortont.cfwatch</string>
+<key>ProgramArguments</key>
+<array>
+<string>/usr/bin/make</string>
+</array>
+<key>EnvironmentVariables</key>
+<dict>
+    <key>PATH</key>
+    <string>/opt/local/bin:$PATH</string> <!-- Needs to point to your Python install -->
+    <key>AWS_ACCESS_KEY_ID</key>
+    <string></string> <!-- Fill this in -->
+    <key>AWS_SECRET_ACCESS_KEY</key>
+    <string></string> <!-- Fill this in -->
+</dict>
+<key>StartInterval</key>
+<integer>600</integer>
+<key>WorkingDirectory</key>
+<string>/Users/hortont/src/cfwatch</string> <!-- Needs to point to your cfwatch install -->
+<key>RunAtLoad</key>
+<true />
+</dict>
+</plist>
