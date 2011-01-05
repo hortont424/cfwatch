@@ -61,4 +61,22 @@ def top_files_transfer():
 
     return (map, reduce, display)
 
+@statistic
+def transfer_per_bucket():
+    def map(row):
+        return (row[5], int(row[1]))
 
+    def reduce(results):
+        cnt = defaultdict(int)
+
+        for file, transfer in results:
+            cnt[file] += transfer
+
+        return cnt
+
+    def display(result):
+        largest_items = nlargest(20, result.iteritems(), itemgetter(1))
+        return ("Transfer Per Bucket:\n   " +
+                "\n   ".join(["{0} - {1}".format(name, format_size(num)) for name, num in largest_items]))
+
+    return (map, reduce, display)
