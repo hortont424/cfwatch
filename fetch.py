@@ -4,6 +4,8 @@ import gzip
 import sqlite3
 import cStringIO as StringIO
 
+from util import open_cloudfront_log_db
+
 LOG_BUCKET = "logs.hortont.com"
 S3_PREFIXES = ["backups.hortont.com",
                "files.hortona.com",
@@ -74,7 +76,7 @@ def populate_db_with_table(db, table):
     db.commit()
 
 def create_cloudfront_log_db():
-    db = sqlite3.connect('cf.db')
+    db = open_cloudfront_log_db()
 
     if not retrieve_schema(db, "logs"):
         db.execute("create table logs (scstatus text, scbytes text, csuriquery text, csmethod text, csreferer text, cshost text, csuristem text, time text, date text, cip text, xedgelocation text, csuseragent text)")
