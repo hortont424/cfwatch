@@ -38,7 +38,8 @@ S3_PREFIXES = ["backups.hortont.com",
                "files.whatmannerofburgeristhis.com"]
 CF_PREFIXES = ["files.hortona.com-cloudfront",
                "files.hortont.com-cloudfront",
-               "files.whatmannerofburgeristhis.com-cloudfront"]
+               "files.whatmannerofburgeristhis.com-cloudfront",
+               "notebook.hortont.com-cloudfront"]
 
 conn = boto.connect_s3()
 bucket = conn.get_bucket(LOG_BUCKET)
@@ -126,7 +127,9 @@ def import_cloudfront_logs(cloudfront_db, prefix):
 
     for key, parsed_log in [(key, parse_w3c_log(log)) for key, log in logs]:
         print "Importing", key.key
-        table.extend(create_table_from_log(parsed_log))
+        newTable = create_table_from_log(parsed_log)
+        if newTable:
+            table.extend(newTable)
 
     populate_db_with_table(cloudfront_db, table)
 
