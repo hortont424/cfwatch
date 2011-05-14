@@ -45,10 +45,9 @@ conn = boto.connect_s3()
 bucket = conn.get_bucket(LOG_BUCKET)
 
 def get_logs_for_prefix(prefix):
-    for key in bucket.get_all_keys():
-        if key.key.startswith(prefix):
-            gzip_content = StringIO.StringIO(key.get_contents_as_string())
-            yield (key, gzip.GzipFile(fileobj=gzip_content).read())
+    for key in bucket.list(prefix):
+        gzip_content = StringIO.StringIO(key.get_contents_as_string())
+        yield (key, gzip.GzipFile(fileobj=gzip_content).read())
 
 def parse_w3c_log(log):
     headers = {}
